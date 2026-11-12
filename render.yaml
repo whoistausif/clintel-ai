@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: clintel-ai-demo
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: CLINTEL_ENV
+        value: development
+      - key: CLINTEL_DATA_MODE
+        value: synthetic
+      - key: CLINTEL_MODEL_PATH
+        value: /tmp/readmission-demo.joblib
+      - key: CLINTEL_AUDIT_PATH
+        value: /tmp/audit.jsonl

@@ -25,7 +25,13 @@ ClinIntel AI is a clinical risk and patient-intelligence **research prototype**.
 
 For a TLS-terminated deployment, place a trusted certificate/key at `certs/fullchain.pem` and `certs/privkey.pem`, set `CLINTEL_ENV=production`, set `CLINTEL_DATA_MODE=approved_csv`, point `CLINTEL_MODEL_PATH` at a reviewed non-synthetic artifact, update allowed origins, and start with `docker compose --profile tls up --build`. The API port and PostgreSQL port bind to loopback; Nginx is the public TLS entry point. The browser can pass a service key using **Connect API**. This is shared-key authentication, not per-user role authorization.
 
-The container starts in development mode and trains a baseline on deterministic synthetic data if no artifact exists. The API refuses synthetic auto-training when `CLINTEL_ENV=production`; production requires a reviewed model artifact and an explicitly approved data workflow. The dashboard may call the API without a key only in local development. Never put an API secret in browser code.
+The container starts in development mode and trains a baseline on deterministic synthetic data if no artifact exists. The API refuses synthetic auto-training when `CLINTEL_ENV=production`; production requires a reviewed model artifact and an explicitly approved data workflow. The public Render demo uses development mode with synthetic data only; never point it at real or approved patient data. Never put an API secret in browser code.
+
+## Deploy a public synthetic demo
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/whoistausif/clintel-ai)
+
+The included `render.yaml` creates one free Docker web service for a **synthetic-data demo only**. It does not provision a database; predictions and audit events are temporary and may be lost when the service restarts. Free Render services can spin down while idle. This configuration is for portfolio demonstration, not production or real patient information. Do not submit PHI, credentials, or approved cohort data to the public demo. For production, use the governed deployment workflow above with reviewed artifacts, authentication, database, and institutional approvals.
 
 ## Start locally
 
