@@ -1,0 +1,50 @@
+services:
+  api:
+    build: .
+    env_file: .env
+    environment:
+      CLINTEL_DATABASE_URL: "postgresql://clintel_app:${CLINTEL_APP_PASSWORD:?Set CLINTEL_APP_PASSWORD in .env}@db:5432/clintel"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./artifacts:/app/artifacts
+      - ./knowledge:/app/knowledge:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  tls-proxy:
+    image: nginx:1.27-alpine
+    profiles: ["tls"]
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: clintel
+      POSTGRES_USER: clintel_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      CLINTEL_APP_PASSWORD: ${CLINTEL_APP_PASSWORD:?Set CLINTEL_APP_PASSWORD in .env}
+      CLINTEL_INGEST_PASSWORD: ${CLINTEL_INGEST_PASSWORD:?Set CLINTEL_INGEST_PASSWORD in .env}
+    volumes:
+      - clintel-db:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+      - ./database/002-runtime-role.sql:/runtime-role.sql:ro
+      - ./database/002-runtime-role.sh:/docker-entrypoint-initdb.d/003-runtime-role.sh:ro
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clintel_admin -d clintel"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    restart: unless-stopped
+volumes:
+  clintel-db:

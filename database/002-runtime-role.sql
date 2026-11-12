@@ -1,0 +1,11 @@
+CREATE ROLE clintel_app LOGIN PASSWORD :'app_password';
+CREATE ROLE clintel_ingest LOGIN PASSWORD :'ingest_password';
+GRANT CONNECT ON DATABASE clintel TO clintel_app;
+GRANT CONNECT ON DATABASE clintel TO clintel_ingest;
+GRANT USAGE ON SCHEMA public TO clintel_app;
+GRANT USAGE ON SCHEMA public TO clintel_ingest;
+GRANT SELECT ON patients, admissions, admission_features, admission_outcomes, vitals, labs, medications, diagnoses, procedures, clinical_notes, predictions, explanations, knowledge_documents, audit_logs TO clintel_app;
+GRANT INSERT ON patients, predictions, explanations, audit_logs TO clintel_app;
+GRANT SELECT, INSERT, UPDATE ON patients, admissions, admission_features, admission_outcomes TO clintel_ingest;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO clintel_app;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO clintel_app;
